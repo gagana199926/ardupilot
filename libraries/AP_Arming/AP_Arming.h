@@ -3,6 +3,8 @@
 #include <AP_HAL/AP_HAL_Boards.h>
 #include <AP_HAL/Semaphores.h>
 #include <AP_Param/AP_Param.h>
+#include <AP_HAL/AP_HAL.h>
+#include <AP_BoardConfig/AP_BoardConfig.h>
 
 #include "AP_Arming_config.h"
 
@@ -142,6 +144,11 @@ public:
         return (_arming_options & uint32_t(option)) != 0;
     }
 
+    AP_Int8 &getAccelchk()
+    {
+        return _accel_chk;
+    }
+
 protected:
 
     // Parameters
@@ -151,7 +158,16 @@ protected:
     AP_Int8                 _rudder_arming;
     AP_Int32                _required_mission_items;
     AP_Int32                _arming_options;
-
+    //AP_Int32              _arming__accel_cal;
+    //AP_Int8               _esc_cal;
+    //AP_Int8               _gyro_check;
+    //AP_Int8               _baro_check;
+    AP_Int8                 _baro_chk;
+    AP_Int8                 _gyro_chk;
+    AP_Int8                 _esc_chk;
+    AP_Int8                 _accel_chk;
+    AP_Int8                 _level_horizon_chk;
+   
     // internal members
     bool                    armed;
     uint32_t                last_accel_pass_ms;

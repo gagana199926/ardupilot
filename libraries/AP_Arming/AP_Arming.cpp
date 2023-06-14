@@ -14,8 +14,8 @@
  */
 
 #include "AP_Arming.h"
-#include <AP_HAL/AP_HAL.h>
-#include <AP_BoardConfig/AP_BoardConfig.h>
+
+
 #include <AP_BattMonitor/AP_BattMonitor.h>
 #include <AP_Compass/AP_Compass.h>
 #include <AP_Notify/AP_Notify.h>
@@ -142,7 +142,42 @@ const AP_Param::GroupInfo AP_Arming::var_info[] = {
     // @Description: Options that can be applied to change arming behaviour
     // @Values: 0:None,1:Disable prearm display
     // @User: Advanced
-    AP_GROUPINFO("OPTIONS", 9,   AP_Arming, _arming_options, 0),
+    AP_GROUPINFO("OPTIONS", 9,   AP_Arming, _arming_options,0),
+
+     // @Param:BARO_CAL 
+    // @DisplayName:baro check
+    // @Description: 
+    // @Values:
+    // @User:
+    AP_GROUPINFO("BARO_CAL",    10,     AP_Arming,    _baro_chk,0),
+
+    // @Param: GYRO_CAL
+    // @DisplayName: gyro check
+    // @Description: 
+    // @Values:
+    // @User:
+    AP_GROUPINFO("GYRO_CAL",    11,     AP_Arming,    _gyro_chk,0),
+
+    // @Param: 
+    // @DisplayName: 
+    // @Description: 
+    // @Values:
+    // @User:
+    AP_GROUPINFO("ESC_CAL",    12,     AP_Arming,    _esc_chk,0),
+    
+    // @Param: 
+    // @DisplayName: 
+    // @Description: 
+    // @Values:
+    // @User:
+    AP_GROUPINFO("ACCEL_CAL",    13,     AP_Arming,    _accel_chk,0),
+
+    // @Param;
+    // @DisplayName:
+    // @Description:
+    // @Values:
+    // @user:
+    AP_GROUPINFO("LEVEL_HOR", 14,    AP_Arming,    _level_horizon_chk,0),
 
     AP_GROUPEND
 };
@@ -164,8 +199,21 @@ AP_Arming::AP_Arming()
 
 // performs pre-arm checks. expects to be called at 1hz.
 void AP_Arming::update(void)
+
 {
+
+    
     const uint32_t now_ms = AP_HAL::millis();
+
+     //_gyro_chk.set_and_save(1);
+
+     //_baro_chk.set_and_save(1);
+
+     //_esc_chk.set_and_save(1);
+
+     //_level_horizon_chk.set_and_save(1);
+
+
     // perform pre-arm checks & display failures every 30 seconds
     bool display_fail = false;
     if (now_ms - last_prearm_display_ms > PREARM_DISPLAY_PERIOD*1000) {
@@ -381,9 +429,12 @@ bool AP_Arming::ins_accels_consistent(const AP_InertialSensor &ins)
 bool AP_Arming::ins_gyros_consistent(const AP_InertialSensor &ins)
 {
     const uint8_t gyro_count = ins.get_gyro_count();
+    
+  //_required_mission_items = 1;
     if (gyro_count <= 1) {
         return true;
     }
+    
 
     const Vector3f &prime_gyro_vec = ins.get_gyro();
     const uint32_t now = AP_HAL::millis();
@@ -421,9 +472,13 @@ bool AP_Arming::ins_checks(bool report)
 {
     if (check_enabled(ARMING_CHECK_INS)) {
         const AP_InertialSensor &ins = AP::ins();
+        //_gyro_chk = 0;
         if (!ins.get_gyro_health_all()) {
             check_failed(ARMING_CHECK_INS, report, "Gyros not healthy");
             return false;
+        }
+        else{
+           // _gyro_chk = 1;
         }
         if (!ins.gyro_calibrated_ok_all()) {
             check_failed(ARMING_CHECK_INS, report, "Gyros not calibrated");
@@ -664,6 +719,7 @@ bool AP_Arming::hardware_safety_check(bool report)
 {
     if (check_enabled(ARMING_CHECK_SWITCH)) {
 
+        
       // check if safety switch has been pushed
       if (hal.util->safety_switch_state() == AP_HAL::Util::SAFETY_DISARMED) {
           check_failed(ARMING_CHECK_SWITCH, report, "Hardware safety switch");
@@ -1291,6 +1347,9 @@ bool AP_Arming::fettec_checks(bool display_failure) const
     // check ESCs are ready
     char fail_msg[MAVLINK_MSG_STATUSTEXT_FIELD_TEXT_LEN+1];
     if (!f->pre_arm_check(fail_msg, ARRAY_SIZE(fail_msg))) {
+    
+
+
         check_failed(ARMING_CHECK_ALL, display_failure, "FETtec: %s", fail_msg);
         return false;
     }

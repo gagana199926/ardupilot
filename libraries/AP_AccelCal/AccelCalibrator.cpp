@@ -16,6 +16,7 @@
 #include "AccelCalibrator.h"
 #include <stdio.h>
 #include <AP_HAL/AP_HAL.h>
+#include<AP_Arming/AP_Arming.h>
 
 const extern AP_HAL::HAL& hal;
 /*
@@ -305,6 +306,9 @@ void AccelCalibrator::set_status(enum accel_cal_status_t status) {
             }
 
             _status = ACCEL_CAL_SUCCESS;
+            
+            AP::arming().getAccelchk().set_and_save(1);
+        
             break;
 
         case ACCEL_CAL_FAILED:
